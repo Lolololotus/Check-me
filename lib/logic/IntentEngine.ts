@@ -22,6 +22,10 @@ export class IntentEngine {
         const locationMatch = input.match(/(.+)에서|(.+)으로 이동/);
         const detectedLocation = locationMatch ? (locationMatch[1] || locationMatch[2]) : undefined;
 
+        // Detect "Long Distance" (Mock keywords)
+        const longDistanceKeywords = ['공항', '대전', '부산', '판교', '인천'];
+        const isLongDistance = detectedLocation ? longDistanceKeywords.some(k => detectedLocation.includes(k)) : false;
+
         // Classify
         const category = this.classify(input, time, !!detectedLocation);
 
@@ -30,7 +34,8 @@ export class IntentEngine {
             target: input, // In a real NLP, this would be the extracted entity
             time,
             category,
-            detectedLocation
+            detectedLocation,
+            isLongDistance
         };
     }
 

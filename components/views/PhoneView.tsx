@@ -1,52 +1,43 @@
 'use client';
 
 import { Task } from '@/lib/logic/types';
-import TaskCard from '@/components/core/TaskCard';
-import NowLine from '@/components/core/NowLine';
+import PriorityAccordion from './PriorityAccordion';
+import DynamicTimeline from './DynamicTimeline';
 import { motion } from 'framer-motion';
 
-export default function PhoneView({ tasks }: { tasks: Task[] }) {
-    const topPriority = tasks.find(t => t.priority === 1);
-    const sortedTasks = [...tasks].sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-    // Generate 24h Grid
-    const hours = Array.from({ length: 24 }, (_, i) => i);
+export default function PhoneView({ tasks, onToggleTask }: { tasks: Task[], onToggleTask: (id: string) => void }) {
 
     return (
-        <div className="w-[375px] h-[812px] bg-black border-8 border-gray-900 rounded-[3rem] overflow-hidden relative flex flex-col shadow-2xl">
-            {/* Notch */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-black rounded-b-2xl z-50"></div>
-
-            {/* 1. Priority Section (Top Fixed) */}
-            <div className="p-6 pt-12 bg-gradient-to-b from-gray-900 to-black z-10 shrink-0">
-                <h2 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Top Priority</h2>
-                {topPriority && <TaskCard task={topPriority} />}
+        <div className="flex flex-col h-[800px] w-[390px] bg-black/90 rounded-[40px] border-[8px] border-neutral-800 overflow-hidden shadow-2xl relative">
+            {/* [A] Top Status Bar */}
+            <div className="h-14 bg-neutral-900/50 backdrop-blur-md flex items-center justify-between px-6 z-20 border-b border-white/5">
+                <span className="text-xs font-medium text-gray-400">Feb 19</span>
+                <span className="text-xs font-bold text-blue-400 animate-pulse">
+                    수면 빚 1.5h
+                </span>
             </div>
 
-            {/* 2. Timeline Section (Scrollable) */}
-            <div className="flex-1 overflow-y-auto relative no-scrollbar">
-                <NowLine />
+            {/* Split View */}
+            <div className="flex-1 flex flex-col relative">
 
-                <div className="relative py-4">
-                    {hours.map(h => (
-                        <div key={h} className="group flex items-start h-[80px] border-b border-white/5 px-4 relative">
-                            {/* Time Label */}
-                            <span className="text-gray-600 text-xs font-mono w-12 pt-2">
-                                {h.toString().padStart(2, '0')}:00
-                            </span>
-
-                            {/* Task Rendering */}
-                            <div className="flex-1 relative h-full">
-                                {sortedTasks.filter(t => parseInt(t.startTime.split(':')[0]) === h).map(task => (
-                                    <div key={task.id} className="absolute w-full z-10 top-2">
-                                        <TaskCard task={task} compact />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
+                {/* [B] Top Half: Priority List (Accordion) */}
+                <div className="flex-1 overflow-visible z-10 bg-gradient-to-b from-neutral-900 via-neutral-900/95 to-transparent">
+                    <PriorityAccordion dailyTasks={tasks} onToggleTask={onToggleTask} />
                 </div>
+
+                {/* [C] Bottom Half (Background-like): Dynamic Timeline */}
+                <div className="flex-1 relative border-t border-white/10">
+                    <div className="absolute inset-0">
+                        <DynamicTimeline tasks={tasks} />
+                    </div>
+                    {/* Gradient Overlay to blend with Accordion */}
+                    <div className="absolute top-0 w-full h-12 bg-gradient-to-b from-neutral-900 to-transparent pointer-events-none" />
+                </div>
+
             </div>
+
+            {/* [D] Bottom Interaction Layer (Placeholder) */}
+            <div className="absolute bottom-0 w-full h-20 bg-gradient-to-t from-black to-transparent pointer-events-none z-20" />
         </div>
     );
 }

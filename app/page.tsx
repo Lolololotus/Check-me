@@ -63,7 +63,11 @@ export default function Home() {
       // Routine / Movement Logic
       if (result.category === 'Routine' && result.detectedLocation) {
         const buffer = TimeManager.suggestBuffer(true);
-        msg += ` ${result.detectedLocation}까지 이동 시간 ${buffer}분을 버퍼로 확보했습니다.`;
+        if (result.isLongDistance) {
+          msg += ` ${result.detectedLocation}까지 이동 시 30분을 초과할 수 있습니다. 이동 시간을 수정하시겠습니까?`;
+        } else {
+          msg += ` ${result.detectedLocation}까지 이동 시간 ${buffer}분을 버퍼로 확보했습니다.`;
+        }
       }
 
       setJiminyMessage(msg);
@@ -85,6 +89,14 @@ export default function Home() {
     if (msg) {
       setJiminyMessage("로터스님, 지금 일정을 추가하면 수면 시간이 6시간 미만입니다. 내일로 미루시겠습니까?");
     }
+  };
+
+  const handleToggleTask = (id: string) => {
+    setTasks(prev => prev.map(t =>
+      t.id === id
+        ? { ...t, status: t.status === 'Completed' ? 'Active' : 'Completed' }
+        : t
+    ));
   };
 
   return (
@@ -183,7 +195,7 @@ export default function Home() {
           transition={{ duration: 0.4 }}
           className="relative z-10"
         >
-          {viewMode === 'iPhone' && <PhoneView tasks={tasks} />}
+          {viewMode === 'iPhone' && <PhoneView tasks={tasks} onToggleTask={handleToggleTask} />}
           {viewMode === 'Watch' && <WatchView tasks={tasks} />}
           {viewMode === 'Sticky' && <StickyView tasks={tasks} />}
         </motion.div>

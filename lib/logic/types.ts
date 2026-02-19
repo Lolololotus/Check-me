@@ -21,6 +21,7 @@ export interface IntentResult {
     time?: string;
     category?: Category;
     detectedLocation?: string;
+    isLongDistance?: boolean;
 }
 
 export interface HealthState {
